@@ -1,0 +1,5 @@
+msal
+pyautogui
+python-dotenv
+selenium
+webdriver_manager
