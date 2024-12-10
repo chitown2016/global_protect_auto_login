@@ -1,6 +1,7 @@
 import pyautogui
 import subprocess
 from dotenv import find_dotenv, load_dotenv
+import argparse
 import msal
 import requests
 import re
@@ -54,6 +55,17 @@ def extract_token_code(email_content):
     else:
         return {'success': False}
     
+parser = argparse.ArgumentParser(description="Parser for computer type argument")
+parser.add_argument("computer_type", type=int, help="0 for home desktop, 1 for work laptop")
+args = parser.parse_args()
+
+if args.computer_type == 0:
+    x1, y1 = 3743, 2091
+    x2, y2 = 3700, 2050
+else:
+    x1, y1 = 1790, 1117
+    x2, y2 = 1765, 1070
+    
 
 get_emails_output = get_emails()
 
@@ -62,13 +74,12 @@ if get_emails_output['success']:
 
     subprocess.Popen(['C:/Program Files/Palo Alto Networks/GlobalProtect/PanGPA.exe'])
     time.sleep(0.5)
-    pyautogui.click(x=3743, y=2091)
-
-
+    pyautogui.click(x=x1, y=y1)
+      
     time.sleep(3)
     pyautogui.typewrite(global_protect_password)
 
-    pyautogui.click(x=3700, y=2050)
+    pyautogui.click(x=x2, y=y2)
 
     while True:
         get_emails_output = get_emails(access_token=get_emails_output['access_token'])
@@ -82,6 +93,7 @@ if get_emails_output['success']:
     extract_token_code_output = extract_token_code(email_content)
 
     pyautogui.typewrite(extract_token_code_output['token_code'])
-    pyautogui.click(x=3700, y=2050)
+    pyautogui.click(x=x2, y=y2)
+
 
 #print(pyautogui.position())
