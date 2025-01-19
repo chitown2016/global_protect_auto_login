@@ -1,12 +1,15 @@
 import pyautogui
 import subprocess
 from dotenv import find_dotenv, load_dotenv
+import pytesseract
 import argparse
 import msal
 import requests
 import re
 import time
 import os
+
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 load_dotenv(find_dotenv())
 global_protect_password = os.getenv('global_protect_password')
@@ -61,11 +64,12 @@ args = parser.parse_args()
 
 if args.computer_type == 0:
     x1, y1 = 3743, 2091
-    x2, y2 = 3700, 2050
+    x2, y2 = 3550, 1800
+    x3, y3 = 3700, 2050
 else:
     x1, y1 = 1790, 1117
-    x2, y2 = 1765, 1070
-    
+    x3, y3 = 1765, 107012560606
+    12560606
 
 get_emails_output = get_emails()
 
@@ -73,13 +77,29 @@ if get_emails_output['success']:
     last_received_datetime = get_emails_output['emails']['value'][0]['receivedDateTime']
 
     subprocess.Popen(['C:/Program Files/Palo Alto Networks/GlobalProtect/PanGPA.exe'])
-    time.sleep(0.5)
-    pyautogui.click(x=x1, y=y1)
-      
-    time.sleep(3)
-    pyautogui.typewrite(global_protect_password)
 
-    pyautogui.click(x=x2, y=y2)
+    time.sleep(0.2)
+    
+    while True:
+        screenshot = pyautogui.screenshot(region=(x2, y2, 300, 300))
+        text = pytesseract.image_to_string(screenshot)
+        stripped_text = text.strip()
+        print(text)
+
+        time.sleep(0.5)
+        if ("Authentication Failed" in stripped_text) or ("Enter login credentials" in stripped_text):
+            pyautogui.click(x=3541, y=2005)
+            pyautogui.typewrite(global_protect_password)
+            pyautogui.click(x=x3, y=y3)
+            #time.sleep(3)
+        elif "Connection Failed" in  stripped_text:
+            pyautogui.click(x=x1, y=y1)
+            #time.sleep(3)
+        elif "Enter the portal address to connect" in stripped_text:
+            pyautogui.click(x=x1, y=y1)
+            #time.sleep(3)
+        elif "tokencode" in stripped_text:
+            break
 
     while True:
         get_emails_output = get_emails(access_token=get_emails_output['access_token'])
@@ -93,7 +113,7 @@ if get_emails_output['success']:
     extract_token_code_output = extract_token_code(email_content)
 
     pyautogui.typewrite(extract_token_code_output['token_code'])
-    pyautogui.click(x=x2, y=y2)
+    pyautogui.click(x=x3, y=y3)
 
 
 #print(pyautogui.position())

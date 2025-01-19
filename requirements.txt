@@ -1,5 +1,6 @@
 msal
 pyautogui
 python-dotenv
+pytesseract
 selenium
 webdriver_manager
