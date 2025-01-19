@@ -10,8 +10,10 @@ subprocess.Popen(['C:/Program Files/Palo Alto Networks/GlobalProtect/PanGPA.exe'
 time.sleep(0.5)
 
 x1, y1 = 3550, 1800
+x1, y1 = 1600, 817
 
 screenshot = pyautogui.screenshot(region=(x1, y1, 300, 300))
+screenshot.save("WUHU.jpg")
 
 text = pytesseract.image_to_string(screenshot)
 print(type(text))
