@@ -102,7 +102,7 @@ if get_emails_output['success']:
         elif "Connection Failed" in  stripped_text:
             pyautogui.click(x=x1, y=y1)
             #time.sleep(3)
-        elif "Enter the portal address to connect" in stripped_text:
+        elif "Enter the portal address to connect" in stripped_text or "Select the portal to connect" in stripped_text:
             pyautogui.click(x=x1, y=y1)
             #time.sleep(3)
         elif "tokencode" in stripped_text:
