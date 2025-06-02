@@ -79,7 +79,7 @@ time.sleep(0.2)
 screenshot = pyautogui.screenshot(region=(x2, y2, 300, 300))
 text = pytesseract.image_to_string(screenshot)
 stripped_text = text.strip()
-if "Connected" in stripped_text:
+if "Connected" in stripped_text and "Not Connected" not in stripped_text:
     exit()
 
 get_emails_output = get_emails()
@@ -87,8 +87,6 @@ get_emails_output = get_emails()
 if get_emails_output['success']:
     last_received_datetime = get_emails_output['emails']['value'][0]['receivedDateTime']
 
-    
-    
     while True:
         
         print(text)
