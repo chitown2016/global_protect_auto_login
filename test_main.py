@@ -11,8 +11,9 @@ time.sleep(0.5)
 
 x1, y1 = 3550, 1800
 x1, y1 = 1600, 817
+x1, y1 = 2185, 1075   # MSI laptop OCR box top-left
 
-screenshot = pyautogui.screenshot(region=(x1, y1, 300, 300))
+screenshot = pyautogui.screenshot(region=(x1, y1, 360, 470))
 screenshot.save("WUHU.jpg")
 
 text = pytesseract.image_to_string(screenshot)

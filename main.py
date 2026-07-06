@@ -59,7 +59,7 @@ def extract_token_code(email_content):
         return {'success': False}
     
 parser = argparse.ArgumentParser(description="Parser for computer type argument")
-parser.add_argument("computer_type", type=int, help="0 for home desktop, 1 for work laptop")
+parser.add_argument("computer_type", type=int, help="0 for home desktop, 1 for work laptop, 2 for MSI laptop")
 args = parser.parse_args()
 
 if args.computer_type == 0:
@@ -67,16 +67,24 @@ if args.computer_type == 0:
     x2, y2 = 3550, 1800
     x3, y3 = 3541, 2005
     x4, y4 = 3700, 2050
-else:
+    w, h = 300, 300       # OCR capture box size
+elif args.computer_type == 1:
     x1, y1 = 1790, 1117
     x2, y2 = 1600, 817
     x3, y3 = 1679, 1026
     x4, y4 = 1765, 1070
+    w, h = 300, 300       # OCR capture box size
+else:  # 2 = MSI laptop
+    x1, y1 = 2378, 1495   # Connect / portal button
+    x2, y2 = 2185, 1075   # top-left of OCR box (panel top-left)
+    x3, y3 = 2250, 1398   # password field
+    x4, y4 = 2352, 1467   # Sign In / submit button
+    w, h = 360, 470       # OCR capture box size (covers whole panel)
 
 # If already connected, exit
 subprocess.Popen(['C:/Program Files/Palo Alto Networks/GlobalProtect/PanGPA.exe'])
 time.sleep(0.2)
-screenshot = pyautogui.screenshot(region=(x2, y2, 300, 300))
+screenshot = pyautogui.screenshot(region=(x2, y2, w, h))
 text = pytesseract.image_to_string(screenshot)
 stripped_text = text.strip()
 if "Connected" in stripped_text and "Not Connected" not in stripped_text:
@@ -87,8 +95,17 @@ get_emails_output = get_emails()
 if get_emails_output['success']:
     last_received_datetime = get_emails_output['emails']['value'][0]['receivedDateTime']
 
+    # The interactive sign-in above opens a browser that can end up covering the
+    # GlobalProtect panel. Re-summon GP to its docked corner and take a fresh
+    # screenshot before we start clicking, so we act on what's actually on top.
+    subprocess.Popen(['C:/Program Files/Palo Alto Networks/GlobalProtect/PanGPA.exe'])
+    time.sleep(1)
+    screenshot = pyautogui.screenshot(region=(x2, y2, w, h))
+    text = pytesseract.image_to_string(screenshot)
+    stripped_text = text.strip()
+
     while True:
-        
+
         print(text)
 
         time.sleep(0.5)
@@ -106,7 +123,7 @@ if get_emails_output['success']:
         elif "tokencode" in stripped_text:
             break
     
-        screenshot = pyautogui.screenshot(region=(x2, y2, 300, 300))
+        screenshot = pyautogui.screenshot(region=(x2, y2, w, h))
         text = pytesseract.image_to_string(screenshot)
         stripped_text = text.strip()
 
@@ -121,6 +138,12 @@ if get_emails_output['success']:
     email_content = get_emails_output['emails']['value'][0]['body']['content']
     extract_token_code_output = extract_token_code(email_content)
 
+    # Waiting for / reading the token email can leave a browser window on top of
+    # the GlobalProtect panel. Re-summon GP to the corner and click the token
+    # field to focus it before typing, so the code doesn't go into the void.
+    subprocess.Popen(['C:/Program Files/Palo Alto Networks/GlobalProtect/PanGPA.exe'])
+    time.sleep(1)
+    pyautogui.click(x=x3, y=y3)
     pyautogui.typewrite(extract_token_code_output['token_code'])
     pyautogui.click(x=x4, y=y4)
 
